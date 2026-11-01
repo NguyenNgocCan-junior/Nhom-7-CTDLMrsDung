@@ -411,6 +411,150 @@ void tuNgauNhien() {
     cout << "  " << chiTietTu(dsTu[k], timNut(dsTu[k])) << endl; 
     cout << "  *********************************" << endl; 
 } 
+void chucNangGhiNho() {
+    while (true) {
+        cout << endl << "== TU CAN GHI NHO (" << canGhiNho.size() << " tu) ==" << endl;
+        if (canGhiNho.size() == 0) {
+            cout << "  (chua co tu nao)" << endl;
+        }
+        for (int i = 0; i < canGhiNho.size(); i++) {
+            TrieNode* p = timNut(canGhiNho[i]);
+            cout << "  " << i + 1 << ". " << canGhiNho[i] << " : ";
+            if (p != NULL && p->laTu) cout << p->nghia << endl;
+            else cout << "(tu nay da bi xoa khoi tu dien)" << endl;
+        }
+        cout << endl << "1. Them tu vao danh sach  2. Bo tu khoi danh sach  0. Quay lai" << endl;
+        cout << "Chon: ";
+        string chon;
+        getline(cin, chon);
+        if (chon == "0" || cin.fail()) break;
+
+        if (chon == "1") {
+            cout << "Nhap tu can luu: ";
+            string tu;
+            getline(cin, tu);
+            cout << "  " << thongBaoGhiNho(chuThuong(tu)) << endl;
+        } else if (chon == "2") {
+            cout << "Nhap so thu tu can bo: ";
+            string so;
+            getline(cin, so);
+            int k = atoi(so.c_str());
+            if (k >= 1 && k <= canGhiNho.size()) {
+                canGhiNho.erase(canGhiNho.begin() + (k - 1));
+                luuGhiNho();
+                cout << "  Da bo khoi danh sach" << endl;
+            } else {
+                cout << "  So thu tu khong hop le" << endl;
+            }
+        }
+    }
+}
+
+// ---------- On tap tu can ghi nho ----------
+// Hien nghia tieng Viet, nguoi dung go tu tieng Anh.
+// Tra loi dung lien tiep SO_LAN_THUOC lan thi tu do da thuoc va duoc bo khoi danh sach.
+// Tra loi sai thi tu do bi dua ve 0 lan dung va se duoc hoi lai som hon.
+const int SO_LAN_THUOC = 2;
+
+struct MucOnTap {
+    string tu;
+    int dem;        // so lan tra loi dung lien tiep
+};
+
+void chucNangOnTap() {
+    vector<MucOnTap> hang;      // hang doi cac tu can on
+    for (int i = 0; i < canGhiNho.size(); i++) {
+        TrieNode* p = timNut(canGhiNho[i]);
+        if (p != NULL && p->laTu) {          // bo qua tu da bi xoa khoi tu dien
+            MucOnTap m;
+            m.tu = canGhiNho[i];
+            m.dem = 0;
+            hang.push_back(m);
+        }
+    }
+    if (hang.size() == 0) {
+        cout << "  Danh sach tu can ghi nho dang trong." << endl;
+        cout << "  (Them tu bang phim Tab o chuc nang 1, hoac o muc 9)" << endl;
+        return;
+    }
+
+    for (int i = (int)hang.size() - 1; i > 0; i--) {     // tron ngau nhien thu tu
+        int j = rand() % (i + 1);
+        swap(hang[i], hang[j]);
+    }
+
+    cout << endl << "== ON TAP TU CAN GHI NHO ==" << endl;
+    cout << "Xem nghia tieng Viet roi go tu tieng Anh tuong ung." << endl;
+    cout << "Dung " << SO_LAN_THUOC << " lan lien tiep thi tu duoc coi la da thuoc va bo khoi danh sach." << endl;
+    cout << "(Enter: bo qua cau nay | /q: ket thuc)" << endl;
+
+    vector<string> daThuoc;
+    int soCau = 0, soDung = 0;
+
+    while (hang.size() > 0) {
+        MucOnTap m = hang[0];
+        hang.erase(hang.begin());
+        TrieNode* p = timNut(m.tu);
+
+        cout << endl << "[Con " << hang.size() + 1 << " tu] Nghia: " << p->nghia;
+        if (p->loaiTu != "") cout << " (" << p->loaiTu << ")";
+        cout << endl << "Goi y: ";
+        for (int i = 0; i < m.tu.size(); i++) cout << "_ ";
+        cout << "(" << m.tu.size() << " chu cai)" << endl;
+        cout << "Tu tieng Anh: ";
+
+        string tl;
+        getline(cin, tl);
+        tl = chuThuong(catKhoang(tl));
+        if (cin.fail() || tl == "/q") {
+            hang.insert(hang.begin(), m);    // cau chua tra loi van con trong hang
+            break;
+        }
+
+        soCau++;
+        if (tl == m.tu) {
+            soDung++;
+            m.dem++;
+            if (m.dem >= SO_LAN_THUOC) {
+                cout << "  Dung! Ban da thuoc tu \"" << m.tu << "\"" << endl;
+                daThuoc.push_back(m.tu);
+            } else {
+                cout << "  Dung! (" << m.dem << "/" << SO_LAN_THUOC << ") - se hoi lai o cuoi luot" << endl;
+                hang.push_back(m);
+            }
+        } else {
+            m.dem = 0;
+            cout << "  Chua dung. Dap an: " << chiTietTu(m.tu, p) << endl;
+            int vt = hang.size() < 2 ? (int)hang.size() : 2;     // hoi lai sau 2 tu nua
+            hang.insert(hang.begin() + vt, m);
+        }
+    }
+
+    // ---- tong ket ----
+    cout << endl << "== KET QUA ON TAP ==" << endl;
+    if (soCau > 0) {
+        cout << "  Tra loi dung " << soDung << "/" << soCau << " cau (" << soDung * 100 / soCau << "%)" << endl;
+    } else {
+        cout << "  Ban chua tra loi cau nao" << endl;
+    }
+    if (daThuoc.size() > 0) {
+        cout << "  Da thuoc " << daThuoc.size() << " tu (da bo khoi danh sach):";
+        for (int i = 0; i < daThuoc.size(); i++) {
+            cout << " " << daThuoc[i];
+            int vt = viTriGhiNho(daThuoc[i]);
+            if (vt >= 0) canGhiNho.erase(canGhiNho.begin() + vt);
+        }
+        cout << endl;
+        luuGhiNho();
+    }
+    if (hang.size() > 0) {
+        cout << "  Con " << hang.size() << " tu can on tiep:";
+        for (int i = 0; i < hang.size(); i++) cout << " " << hang[i].tu;
+        cout << endl;
+    } else if (soCau > 0) {
+        cout << "  Chuc mung! Ban da thuoc het cac tu trong danh sach." << endl;
+    }
+}
 
 
 
