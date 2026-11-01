@@ -350,6 +350,54 @@ int docPhim() {
     return phim;
 #endif
 }
+// ---------- Lich su tra cuu & danh sach tu can ghi nho ----------
+vector<string> lichSu;        // cac tu da tra (tu cu den moi)
+vector<string> canGhiNho;      // cac tu can ghi nho (luu trong file canghinho.txt)
+
+void ghiLichSu(string tu) {
+    if (lichSu.size() > 0 && lichSu[lichSu.size() - 1] == tu) return;   // tranh ghi trung lien tiep
+    lichSu.push_back(tu);
+}
+
+int viTriGhiNho(string tu) {
+    for (int i = 0; i < canGhiNho.size(); i++) {
+        if (canGhiNho[i] == tu) return i;
+    }
+    return -1;
+}
+
+void luuGhiNho() {
+    ofstream f("canghinho.txt");
+    for (int i = 0; i < canGhiNho.size(); i++) {
+        f << canGhiNho[i] << endl;
+    }
+}
+
+void docGhiNho() {
+    ifstream f("canghinho.txt");
+    string dong;
+    while (getline(f, dong)) {
+        while (!dong.empty() && (dong[dong.size() - 1] == '\r' || dong[dong.size() - 1] == ' ')) dong.erase(dong.size() - 1);
+        if (dong != "" && viTriGhiNho(dong) < 0) canGhiNho.push_back(dong);
+    }
+}
+
+// Tra ve 1: da them, 0: da co san trong danh sach, -1: khong phai tu trong tu dien
+int themGhiNho(string tu) {
+    TrieNode* p = timNut(tu);
+    if (p == NULL || p->laTu == false) return -1;
+    if (viTriGhiNho(tu) >= 0) return 0;
+    canGhiNho.push_back(tu);
+    luuGhiNho();
+    return 1;
+}
+
+string thongBaoGhiNho(string tu) {
+    int kq = themGhiNho(tu);
+    if (kq == 1) return ">> Da luu \"" + tu + "\" vao danh sach can ghi nho";
+    if (kq == 0) return ">> \"" + tu + "\" da co trong danh sach can ghi nho";
+    return ">> Chi luu duoc tu co trong tu dien";
+}
 
 
 
