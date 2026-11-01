@@ -743,6 +743,67 @@ void chucNangXoa() {
     } 
 } 
 
+void chucNangHienTatCa() {
+    vector<string> dsTu, dsNghia;
+    duyetDFS(goc, "", dsTu, dsNghia);
+
+    cout << "  Tong cong " << dsTu.size() << " tu (theo thu tu a-z):" << endl;
+    for (int i = 0; i < dsTu.size(); i++) {
+        cout << "  " << dsTu[i] << " : " << dsNghia[i] << endl;
+    }
+}
+
+// Tra nguoc Viet -> Anh: duyet het tu dien, tu nao co nghia chua chuoi can tim thi in ra
+void chucNangTraNguoc() {
+    string tuViet;
+    cout << "Nhap tu tieng Viet (co dau): ";
+    getline(cin, tuViet);
+    tuViet = chuThuong(tuViet);
+
+    vector<string> dsTu, dsNghia;
+    duyetDFS(goc, "", dsTu, dsNghia);
+
+    int dem = 0;
+    for (int i = 0; i < dsTu.size(); i++) {
+        if (dsNghia[i].find(tuViet) != string::npos) {   // nghia co chua tu can tim
+            cout << "  " << dsTu[i] << " : " << dsNghia[i] << endl;
+            dem++;
+        }
+    }
+    if (dem == 0) {
+        cout << "  Khong tim thay tu tieng Anh nao co nghia \"" << tuViet << "\"" << endl;
+    }
+}
+
+// Tim tu theo duoi (vi du "tion"): duyet toan bo cay roi loc cac tu ket thuc bang chuoi do
+void chucNangTimDuoi() {
+    string duoi;
+    cout << "Nhap duoi tu can tim (vi du: tion, ing, er): ";
+    getline(cin, duoi);
+    duoi = chuThuong(catKhoang(duoi));
+    if (duoi == "") {
+        cout << "  Ban chua nhap gi" << endl;
+        return;
+    }
+
+    vector<string> dsTu, dsNghia;
+    duyetDFS(goc, "", dsTu, dsNghia);
+
+    int dem = 0;
+    for (int i = 0; i < dsTu.size(); i++) {
+        int chenh = (int)dsTu[i].size() - (int)duoi.size();
+        if (chenh >= 0 && dsTu[i].compare(chenh, duoi.size(), duoi) == 0) {
+            if (dem == 0) cout << "  Cac tu ket thuc bang \"" << duoi << "\":" << endl;
+            cout << "  - " << dsTu[i] << " : " << dsNghia[i] << endl;
+            dem++;
+        }
+    }
+    if (dem == 0) {
+        cout << "  Khong co tu nao ket thuc bang \"" << duoi << "\"" << endl;
+    } else {
+        cout << "  (" << dem << " tu)" << endl;
+    }
+}
 
 
 
