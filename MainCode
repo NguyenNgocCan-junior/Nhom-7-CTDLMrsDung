@@ -572,7 +572,103 @@ void chucNangLichSu() {
     } 
 } 
 
+// Tra nghia + goi y truc tiep: moi lan bam 1 phim, danh sach goi y duoc cap nhat ngay,
+// nhan Enter de xem nghia cua tu dang go
+void chucNangTraNghia() {
+    if (!laTerminal()) {
+        // Khong phai terminal that (vi du trinh bien dich online) nen khong doc duoc tung phim:
+        // chuyen sang go ca chuoi roi nhan Enter
+        cout << "Khong doc duoc tung phim o moi truong nay." << endl;
+        cout << "Go chuoi roi nhan Enter de tra nghia va xem goi y" << endl;
+        cout << "(go /n de luu tu vua tra vao danh sach can ghi nho, /q de thoat)" << endl;
+        string chuoi;
+        while (true) {
+            cout << "> ";
+            getline(cin, chuoi);
+            chuoi = chuThuong(chuoi);
+            if (chuoi == "/q" || cin.fail()) break;
+            if (chuoi == "/n") {
+                if (lichSu.size() == 0) cout << ">> Ban chua tra tu nao" << endl;
+                else cout << thongBaoGhiNho(lichSu[lichSu.size() - 1]) << endl;
+                continue;
+            }
 
+            TrieNode* q = timNut(chuoi);
+            if (chuoi != "" && q != NULL && q->laTu) {
+                cout << ">> " << chiTietTu(chuoi, q) << endl;
+                ghiLichSu(chuoi);
+            } else if (chuoi != "") {
+                cout << ">> " << thongBaoKhongThay(chuoi) << endl;
+            }
+
+            vector<string> dsTu, dsNghia;
+            duyetDFS(timNut(chuoi), chuoi, dsTu, dsNghia);
+            for (int i = 0; i < dsTu.size() && i < 8; i++) {
+                cout << "  - " << dsTu[i] << " : " << dsNghia[i] << endl;
+            }
+        }
+        return;
+    }
+
+    string tuDangGo = "";     // chuoi nguoi dung dang go
+    string thongBao = "";     // ket qua khi nhan Enter
+    bool daTra = false;       // true sau khi nhan Enter: ky tu tiep theo se bat dau mot tu moi
+
+    while (true) {
+        xoaManHinh();         // xoa man hinh roi ve lai
+        cout << "== TRA NGHIA TU & GOI Y TRUC TIEP ==" << endl;
+        cout << "[Enter: tra nghia | Tab: luu can ghi nho | Backspace: xoa | ESC: thoat]" << endl << endl;
+        cout << "Ban dang nhap: " << tuDangGo << endl << endl;
+
+        if (tuDangGo != "") {
+            vector<string> dsTu, dsNghia;
+            duyetDFS(timNut(tuDangGo), tuDangGo, dsTu, dsNghia);
+            if (dsTu.size() == 0) {
+                cout << "  (khong co tu goi y)" << endl;
+                string g = chuoiGanDung(tuDangGo);        // go sai chinh ta thi goi y tu gan giong
+                if (g != "") cout << "  Co phai ban muon tim: " << g << " ?" << endl;
+            }
+            for (int i = 0; i < dsTu.size() && i < 8; i++) {     // hien toi da 8 tu
+                cout << "  - " << dsTu[i] << " : " << dsNghia[i] << endl;
+            }
+        }
+        if (thongBao != "") {
+            cout << endl << thongBao << endl;
+        }
+
+        int phim = docPhim();         // doc 1 phim
+        if (phim == 27) {             // ESC
+            break;
+        } else if (phim == 13 || phim == 10) {    // Enter
+            TrieNode* p = timNut(tuDangGo);
+            if (tuDangGo == "") {
+                thongBao = "";
+            } else if (p != NULL && p->laTu) {
+                thongBao = ">> " + chiTietTu(tuDangGo, p);
+                ghiLichSu(tuDangGo);
+            } else {
+                thongBao = ">> " + thongBaoKhongThay(tuDangGo);
+            }
+            if (tuDangGo != "") daTra = true;
+        } else if (phim == 9) {                   // Tab: luu tu dang go vao danh sach can ghi nho
+            thongBao = (tuDangGo == "") ? "" : thongBaoGhiNho(tuDangGo);
+        } else if (phim == 8 || phim == 127) {    // Backspace
+            daTra = false;                        // muon sua lai tu vua tra thi van xoa tung ky tu
+            if (tuDangGo.size() > 0) {
+                tuDangGo.erase(tuDangGo.size() - 1);
+            }
+            thongBao = "";
+        } else if (phim >= 32 && phim <= 126) {   // ky tu thuong
+            if (daTra) {                          // vua tra xong: go ky tu moi thi bat dau tu moi
+                tuDangGo = "";
+                daTra = false;
+            }
+            tuDangGo = tuDangGo + (char)phim;
+            tuDangGo = chuThuong(tuDangGo);
+            thongBao = "";
+        }
+    }
+}
 
 
 
