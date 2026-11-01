@@ -294,7 +294,62 @@ void chucNangGoiY() {
     }
 }
 
+// ---------- Ham ho tro doc phim (khac nhau giua Windows va Linux/macOS) ----------
+// Xoa man hinh
+void xoaManHinh() {
+#ifdef _WIN32
+    system("cls");
+#else
+    cout << "\033[2J\033[H";
+#endif
+}
 
+// Co dang chay trong terminal that khong? (trinh bien dich online thuong khong phai)
+bool laTerminal() {
+#ifdef _WIN32
+    return true;
+#else
+    return isatty(STDIN_FILENO) != 0;
+#endif
+}
+
+// Doc 1 phim ngay khi bam, khong can Enter. Phim mui ten, F1... tra ve 0 (bo qua)
+int docPhim() {
+#ifdef _WIN32
+    int phim = _getch();
+    if (phim == 0 || phim == 224) {
+        _getch();
+        return 0;
+    }
+    return phim;
+#else
+    termios cu, moi;
+    tcgetattr(STDIN_FILENO, &cu);          // luu cai dat terminal cu
+    moi = cu;
+    moi.c_lflag &= ~(ICANON | ECHO);       // tat che do cho Enter va tat hien phim
+    moi.c_cc[VMIN] = 1;
+    moi.c_cc[VTIME] = 0;
+    tcsetattr(STDIN_FILENO, TCSANOW, &moi);
+
+    unsigned char c = 0;
+    read(STDIN_FILENO, &c, 1);             // doc 1 phim
+    int phim = c;
+
+    if (phim == 27) {                      // ESC that, hay la phim mui ten (ESC [ A)?
+        moi.c_cc[VMIN] = 0;
+        moi.c_cc[VTIME] = 1;               // cho toi da 0.1 giay xem co ky tu di kem khong
+        tcsetattr(STDIN_FILENO, TCSANOW, &moi);
+        unsigned char tiep;
+        if (read(STDIN_FILENO, &tiep, 1) > 0) {
+            while (read(STDIN_FILENO, &tiep, 1) > 0) { }   // bo not phan con lai
+            phim = 0;                      // phim mui ten -> bo qua
+        }
+    }
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &cu); // tra terminal ve nhu cu
+    return phim;
+#endif
+}
 
 
 
