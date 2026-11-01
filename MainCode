@@ -557,7 +557,20 @@ void chucNangOnTap() {
 }
 
 
-
+void chucNangLichSu() { 
+    cout << endl << "== LICH SU TRA CUU (toi da 20 tu gan nhat) ==" << endl; 
+    if (lichSu.size() == 0) { 
+        cout << "  (chua tra tu nao)" << endl; 
+        return; 
+    } 
+    int dem = 0; 
+    for (int i = (int)lichSu.size() - 1; i >= 0 && dem < 20; i--, dem++) { 
+        TrieNode* p = timNut(lichSu[i]); 
+        cout << "  " << dem + 1 << ". " << lichSu[i]; 
+        if (p != NULL && p->laTu) cout << " : " << p->nghia; 
+        cout << endl; 
+    } 
+} 
 
 
 
