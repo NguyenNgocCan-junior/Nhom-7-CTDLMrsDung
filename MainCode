@@ -805,6 +805,69 @@ void chucNangTimDuoi() {
     }
 }
 
+void hienMenu() { 
+    cout << endl; 
+    cout << "======= TU DIEN ANH - VIET =======" << endl; 
+    cout << "1. Tra nghia cua tu vung" << endl; 
+    cout << "2. Goi y tu vung theo tien to" << endl; 
+    cout << "3. Them tu vung moi" << endl; 
+    cout << "4. Sua tu vung (nghia, loai tu, vi du)" << endl; 
+    cout << "5. Xoa tu vung" << endl; 
+    cout << "6. Hien thi toan bo tu dien" << endl; 
+    cout << "7. Tra nguoc (Viet -> Anh)" << endl; 
+    cout << "8. Xem tu vung ngau nhien" << endl; 
+    cout << "9. Tu vung can ghi nho" << endl; 
+    cout << "10. Lich su tra cuu" << endl; 
+    cout << "11. Tim tu vung theo duoi (vd: tion, ing)" << endl; 
+    cout << "12. On tap tu vung can ghi nho" << endl; 
+    cout << "0. Thoat" << endl; 
+    cout << "Chon chuc nang: "; 
+} 
+ 
+// ---------- Ham main ---------- 
+int main() { 
+#ifdef _WIN32 
+    system("chcp 65001 > nul");     // de go va hien thi duoc tieng Viet tren Windows 
+#endif 
+ 
+    int soTuFile = docFile("dictionary.txt"); 
+    if (soTuFile < 0) { 
+        cout << "Khong mo duoc dictionary.txt (kiem tra ten file va thu muc chay chuong trinh)" << endl; 
+    } else { 
+        cout << "Da nap " << tongSoTu << " tu tu dictionary.txt" << endl; 
+    } 
+    docGhiNho(); 
+    srand(time(NULL)); 
+    tuNgauNhien();      // hien 1 tu cua ngay moi khi mo chuong trinh 
+ 
+    int chon; 
+    do { 
+        hienMenu(); 
+        cin >> chon; 
+        cin.ignore(1000, '\n');     // bo ky tu Enter con thua 
+ 
+        switch (chon) { 
+            case 1: chucNangTraNghia(); break; 
+            case 2: chucNangGoiY(); break; 
+            case 3: chucNangThem(); break; 
+            case 4: chucNangSua(); break; 
+            case 5: chucNangXoa(); break; 
+            case 6: chucNangHienTatCa(); break; 
+            case 7: chucNangTraNguoc(); break; 
+            case 8: tuNgauNhien(); break; 
+            case 9: chucNangGhiNho(); break; 
+            case 10: chucNangLichSu(); break; 
+            case 11: chucNangTimDuoi(); break; 
+            case 12: chucNangOnTap(); break; 
+            case 0: cout << "Tam biet!" << endl; break; 
+            default: 
+                cout << "  Lua chon khong hop le" << endl; 
+        } 
+    } while (chon != 0); 
+ 
+    giaiPhong(goc);     // giai phong bo nho cua cay 
+    return 0; 
+} 
 
 
 
