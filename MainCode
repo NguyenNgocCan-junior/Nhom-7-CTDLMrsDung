@@ -176,6 +176,69 @@ void giaiPhong(TrieNode* p) {
     delete p;
 }
 
+// ---------- Dinh dang 1 tu de hien thi: tu (loai tu) : nghia + dong vi du ----------
+string chiTietTu(string tu, TrieNode* p) {
+    string kq = tu;
+    if (p->loaiTu != "") kq += " (" + p->loaiTu + ")";
+    kq += " : " + p->nghia;
+    if (p->viDu != "") kq += "\n   Vi du: " + p->viDu;
+    if (p->dongNghia != "") kq += "\n   Dong nghia: " + p->dongNghia;
+    if (p->traiNghia != "") kq += "\n   Trai nghia: " + p->traiNghia;
+    return kq;
+}
+
+// ---------- Goi y khi go sai chinh ta: khoang cach chinh sua (Levenshtein) ----------
+// So buoc it nhat (them / xoa / doi 1 ky tu) de bien chuoi a thanh chuoi b
+int khoangCachSua(string a, string b) {
+    vector<int> truoc(b.size() + 1), hien(b.size() + 1);
+    for (int j = 0; j <= b.size(); j++) truoc[j] = j;
+    for (int i = 1; i <= a.size(); i++) {
+        hien[0] = i;
+        for (int j = 1; j <= b.size(); j++) {
+            int doi = truoc[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1);
+            hien[j] = min(min(hien[j - 1] + 1, truoc[j] + 1), doi);
+        }
+        truoc = hien;
+    }
+    return truoc[b.size()];
+}
+
+// Tra ve toi da 3 tu gan giong nhat, ngan cach bang dau phay ("" neu khong co tu nao)
+string chuoiGanDung(string tu) {
+    vector<string> dsTu, dsNghia;
+    duyetDFS(goc, "", dsTu, dsNghia);
+
+    int nguong = (tu.size() <= 4) ? 1 : 2;      // tu ngan thi chi cho sai 1 ky tu
+    vector<pair<int, string> > kq;
+    for (int i = 0; i < dsTu.size(); i++) {
+        int chenh = (int)dsTu[i].size() - (int)tu.size();
+        if (chenh > nguong || chenh < -nguong) continue;      // do dai lech nhieu thi bo qua
+        int d = khoangCachSua(tu, dsTu[i]);
+        if (d > 0 && d <= nguong) {
+            int chung = 0;                       // so ky tu dau giong nhau (cang nhieu cang uu tien)
+            while (chung < tu.size() && chung < dsTu[i].size() && tu[chung] == dsTu[i][chung]) chung++;
+            kq.push_back(make_pair(d * 100 - chung, dsTu[i]));
+        }
+    }
+    sort(kq.begin(), kq.end());                  // gan nhat truoc, bang nhau thi theo a-z
+
+    string s = "";
+    for (int i = 0; i < kq.size() && i < 3; i++) {
+        if (i > 0) s += ", ";
+        s += kq[i].second;
+    }
+    return s;
+}
+
+// Thong bao khong tim thay, kem goi y neu co tu gan giong
+string thongBaoKhongThay(string tu) {
+    string s = "Khong tim thay tu \"" + tu + "\"";
+    string g = chuoiGanDung(tu);
+    if (g != "") s += "\n   Co phai ban muon tim: " + g + " ?";
+    return s;
+}
+
+
 
 
 
