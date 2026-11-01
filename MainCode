@@ -1,3 +1,153 @@
+// =====================================================
+// DE TAI 06: TU DIEN ANH - VIET & GOI Y TU THONG MINH
+// Cau truc du lieu: Cay tien to (Trie)
+// Thuat toan: Tra cuu tien to, DFS tim tu chung tien to
+// =====================================================
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include <algorithm>
+#include <ctime>
+// Doc 1 phim ma khong can nhan Enter: thu vien chuan C++ khong lam duoc,
+// nen dung thu vien rieng cua tung he dieu hanh
+#ifdef _WIN32
+#include <conio.h>        // Windows: _getch()
+#else
+#include <termios.h>      // Linux / macOS: chinh che do nhap cua terminal
+#include <unistd.h>
+#endif
+using namespace std;
 
-using std namespace;
+// ---------- Cau truc mot nut cua cay Trie ----------
+struct TrieNode {
+    TrieNode* con[128];   // mang con tro: moi o ung voi 1 ky tu (ma ASCII)
+    bool laTu;            // true neu day la ky tu cuoi cua mot tu
+    string nghia;         // nghia tieng Viet cua tu
+    string loaiTu;        // loai tu: noun, verb, adj... (co the de trong)
+    string viDu;          // cau vi du (co the de trong)
+    string dongNghia;     // cac tu dong nghia, ngan cach bang dau phay (co the de trong)
+    string traiNghia;     // cac tu trai nghia, ngan cach bang dau phay (co the de trong)
+
+    TrieNode() {
+        for (int i = 0; i < 128; i++) {
+            con[i] = NULL;
+        }
+        laTu = false;
+        nghia = "";
+        loaiTu = "";
+        viDu = "";
+        dongNghia = "";
+        traiNghia = "";
+    }
+};
+
+TrieNode* goc = new TrieNode();   // nut goc cua cay
+int tongSoTu = 0;                 // so tu hien co trong tu dien
+
+// ---------- Doi chu hoa thanh chu thuong ----------
+string chuThuong(string s) {
+    for (int i = 0; i < s.size(); i++) {
+        if (s[i] >= 'A' && s[i] <= 'Z') {
+            s[i] = s[i] + 32;
+        }
+    }
+    return s;
+}
+
+// ---------- Tim nut ung voi mot chuoi (khong thay thi tra ve NULL) ----------
+TrieNode* timNut(string s) {
+    TrieNode* p = goc;
+    for (int i = 0; i < s.size(); i++) {
+        int c = s[i];
+        if (c < 0 || c > 127) return NULL;    // ky tu la thi bo qua
+        if (p->con[c] == NULL) return NULL;   // khong co nhanh nay
+        p = p->con[c];
+    }
+    return p;
+}
+
+// ---------- Them tu vao cay (hoac sua nghia neu tu da co) ----------
+void themTu(string tu, string nghia, string loaiTu = "", string viDu = "", string dongNghia = "", string traiNghia = "") {
+    TrieNode* p = goc;
+    for (int i = 0; i < tu.size(); i++) {
+        int c = tu[i];
+        if (c < 0 || c > 127) return;         // chi nhan chu cai tieng Anh
+        if (p->con[c] == NULL) {
+            p->con[c] = new TrieNode();       // chua co thi tao nut moi
+        }
+        p = p->con[c];
+    }
+    if (p->laTu == false) {
+        tongSoTu++;                           // la tu moi
+    }
+    p->laTu = true;
+    p->nghia = nghia;
+    p->loaiTu = loaiTu;
+    p->viDu = viDu;
+    p->dongNghia = dongNghia;
+    p->traiNghia = traiNghia;
+}
+
+// ---------- Doc file dictionary.txt ----------
+// Moi dong: tu|nghia|loai tu|vi du|dong nghia|trai nghia
+// (chi can tu|nghia la du, cac phan sau co the bo trong; dong nghia/trai nghia ngan cach bang dau phay)
+// Cat khoang trang o hai dau chuoi
+string catKhoang(string s) {
+    while (!s.empty() && (s[s.size() - 1] == ' ' || s[s.size() - 1] == '\r' || s[s.size() - 1] == '\t')) s.erase(s.size() - 1);
+    int i = 0;
+    while (i < s.size() && (s[i] == ' ' || s[i] == '\t')) i++;
+    return s.substr(i);
+}
+
+// Tra ve so tu doc duoc, hoac -1 neu khong mo duoc file
+int docFile(string tenFile) {
+    ifstream f(tenFile.c_str());
+    if (!f.is_open()) return -1;
+    string dong;
+    int dem = 0;
+    bool dau = true;
+    while (getline(f, dong)) {
+        // bo ky tu BOM (UTF-8) o dau file va ky tu xuong dong '\r' cua Windows
+        if (dau && dong.size() >= 3 && dong.substr(0, 3) == "\xEF\xBB\xBF") dong = dong.substr(3);
+        dau = false;
+        while (!dong.empty() && (dong[dong.size() - 1] == '\r' || dong[dong.size() - 1] == ' ')) dong.erase(dong.size() - 1);
+        if (dong == "" || dong[0] == '#') continue;      // bo qua dong trong va dong ghi chu
+        // tach dong thanh toi da 6 phan theo dau '|' (phan cuoi lay het phan con lai)
+        string phan[6];
+        int n = 0;
+        size_t bd = 0;
+        while (n < 5) {
+            size_t vt = dong.find('|', bd);
+            if (vt == string::npos) break;
+            phan[n++] = catKhoang(dong.substr(bd, vt - bd));
+            bd = vt + 1;
+        }
+        phan[n++] = catKhoang(dong.substr(bd));
+
+        string tu = chuThuong(phan[0]);
+        if (n >= 2 && tu != "") {
+            themTu(tu, phan[1], n > 2 ? phan[2] : "", n > 3 ? phan[3] : "",
+                   n > 4 ? phan[4] : "", n > 5 ? phan[5] : "");
+            dem++;
+        }
+    }
+    return dem;
+}
+
+// ---------- Xoa tu (chi bo danh dau, khong xoa nut) ----------
+bool xoaTu(string tu) {
+    TrieNode* p = timNut(tu);
+    if (p == NULL || p->laTu == false) {
+        return false;
+    }
+    p->laTu = false;
+    p->nghia = "";
+    p->loaiTu = "";
+    p->viDu = "";
+    p->dongNghia = "";
+    p->traiNghia = "";
+    tongSoTu--;
+    return true;
+}
