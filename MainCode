@@ -670,7 +670,78 @@ void chucNangTraNghia() {
     }
 }
 
-
+void chucNangThem() { 
+    string tu, nghia; 
+    cout << "Nhap tu tieng Anh can them: "; 
+    getline(cin, tu); 
+    tu = chuThuong(tu); 
+ 
+    TrieNode* p = timNut(tu); 
+    if (p != NULL && p->laTu) { 
+        cout << "  Tu nay da co roi (dung chuc nang Sua de doi nghia)" << endl; 
+        return; 
+    } 
+    string loai, viDu, dongNghia, traiNghia; 
+    cout << "Nhap nghia tieng Viet: "; 
+    getline(cin, nghia); 
+    cout << "Nhap loai tu (noun, verb, adj... - Enter de bo qua): "; 
+    getline(cin, loai); 
+    cout << "Nhap cau vi du (Enter de bo qua): "; 
+    getline(cin, viDu); 
+    cout << "Nhap tu dong nghia, cach nhau dau phay (Enter de bo qua): "; 
+    getline(cin, dongNghia); 
+    cout << "Nhap tu trai nghia, cach nhau dau phay (Enter de bo qua): "; 
+    getline(cin, traiNghia); 
+    themTu(tu, nghia, catKhoang(loai), catKhoang(viDu), chuThuong(catKhoang(dongNghia)), chuThuong(catKhoang(traiNghia))); 
+    cout << "  Da them tu \"" << tu << "\"" << endl; 
+    thongBaoLuu(); 
+} 
+ 
+void chucNangSua() { 
+    string tu, nghia, loai, viDu, dongNghia, traiNghia; 
+    cout << "Nhap tu can sua: "; 
+    getline(cin, tu); 
+    tu = chuThuong(tu); 
+ 
+    TrieNode* p = timNut(tu); 
+    if (p == NULL || p->laTu == false) { 
+        cout << "  " << thongBaoKhongThay(tu) << endl; 
+        return; 
+    } 
+    cout << "  Hien tai: " << chiTietTu(tu, p) << endl; 
+    cout << "(Enter de giu nguyen)" << endl; 
+    cout << "Nghia moi: "; 
+    getline(cin, nghia); 
+    cout << "Loai tu moi: "; 
+    getline(cin, loai); 
+    cout << "Vi du moi: "; 
+    getline(cin, viDu); 
+    cout << "Dong nghia moi (cach nhau dau phay): "; 
+    getline(cin, dongNghia); 
+    cout << "Trai nghia moi (cach nhau dau phay): "; 
+    getline(cin, traiNghia); 
+    if (nghia != "") p->nghia = nghia; 
+    if (loai != "") p->loaiTu = catKhoang(loai); 
+    if (viDu != "") p->viDu = catKhoang(viDu); 
+    if (dongNghia != "") p->dongNghia = chuThuong(catKhoang(dongNghia)); 
+    if (traiNghia != "") p->traiNghia = chuThuong(catKhoang(traiNghia)); 
+    cout << "  Da cap nhat" << endl; 
+    thongBaoLuu(); 
+} 
+ 
+void chucNangXoa() { 
+    string tu; 
+    cout << "Nhap tu can xoa: "; 
+    getline(cin, tu); 
+    tu = chuThuong(tu); 
+ 
+    if (xoaTu(tu)) { 
+        cout << "  Da xoa" << endl; 
+        thongBaoLuu(); 
+    } else { 
+        cout << "  " << thongBaoKhongThay(tu) << endl; 
+    } 
+} 
 
 
 
