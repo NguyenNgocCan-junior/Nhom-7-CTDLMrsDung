@@ -152,6 +152,21 @@ bool xoaTu(string tu) {
     return true;
 }
 
+// ---------- DFS: lay tat ca cac tu di qua nut p ----------
+// hienTai la chuoi ghep tu goc den nut p
+void duyetDFS(TrieNode* p, string hienTai, vector<string>& dsTu, vector<string>& dsNghia) {
+    if (p == NULL) return;
+    if (p->laTu) {
+        dsTu.push_back(hienTai);
+        dsNghia.push_back(p->nghia);
+    }
+    for (int i = 0; i < 128; i++) {
+        if (p->con[i] != NULL) {
+            duyetDFS(p->con[i], hienTai + (char)i, dsTu, dsNghia);
+        }
+    }
+}
+
 
 
 
