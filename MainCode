@@ -400,7 +400,17 @@ string thongBaoGhiNho(string tu) {
 }
 
 
-
+// ---------- Tu cua ngay: chon ngau nhien 1 tu trong tu dien ---------- 
+void tuNgauNhien() { 
+    vector<string> dsTu, dsNghia; 
+    duyetDFS(goc, "", dsTu, dsNghia); 
+    if (dsTu.size() == 0) return; 
+    int k = rand() % dsTu.size(); 
+    cout << endl; 
+    cout << "  ********** TU CUA NGAY **********" << endl; 
+    cout << "  " << chiTietTu(dsTu[k], timNut(dsTu[k])) << endl; 
+    cout << "  *********************************" << endl; 
+} 
 
 
 
