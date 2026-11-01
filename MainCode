@@ -238,6 +238,39 @@ string thongBaoKhongThay(string tu) {
     return s;
 }
 
+// ---------- Luu toan bo tu dien ra dictionary.txt ----------
+// Dong dau tien la dong ghi chu (bat dau bang '#'), khi doc file se bi bo qua
+const string DONG_TIEU_DE = "# TU DIEN ANH-VIET";
+
+string boDauGach(string s) {          // dau '|' dung de ngan cach nen doi sang '/' khi ghi file
+    for (int i = 0; i < s.size(); i++) {
+        if (s[i] == '|') s[i] = '/';
+    }
+    return s;
+}
+
+bool luuTuDien() {
+    ofstream f("dictionary.txt");
+    if (!f.is_open()) return false;
+
+    f << DONG_TIEU_DE << " (moi dong: tu|nghia|loai tu|vi du|dong nghia|trai nghia)" << "\n";
+    vector<string> dsTu, dsNghia;
+    duyetDFS(goc, "", dsTu, dsNghia);
+    for (int i = 0; i < dsTu.size(); i++) {
+        TrieNode* p = timNut(dsTu[i]);
+        f << dsTu[i] << "|" << boDauGach(p->nghia) << "|" << boDauGach(p->loaiTu) << "|" << boDauGach(p->viDu)
+          << "|" << boDauGach(p->dongNghia) << "|" << boDauGach(p->traiNghia) << "\n";
+    }
+    return f.good();
+}
+
+void thongBaoLuu() {
+    if (luuTuDien()) {
+        cout << "  (da luu vao dictionary.txt)" << endl;
+    } else {
+        cout << "  (khong ghi duoc dictionary.txt, thay doi chi co hieu luc den khi thoat)" << endl;
+    }
+}
 
 
 
